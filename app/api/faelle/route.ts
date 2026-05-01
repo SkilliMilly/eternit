@@ -46,7 +46,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { id, maschine, fallTyp, fauf, kundenAuftrag, kommentar, mitarbeiterId, verursacherId, positionen } = body
+    const { id, maschine, fallTyp, fauf, kundenAuftrag, kommentar, mitarbeiterId, verursacherId, createdAt, positionen } = body
 
     if (!id?.trim() || !maschine?.trim() || !fallTyp?.trim() || !mitarbeiterId?.trim()) {
       return NextResponse.json(
@@ -94,6 +94,7 @@ export async function POST(request: Request) {
         kommentar: kommentar?.trim() || null,
         mitarbeiterId,
         verursacherId: verursacherId?.trim() || null,
+        ...(createdAt ? { createdAt: new Date(createdAt) } : {}),
       })
 
     for (const pos of positionen) {

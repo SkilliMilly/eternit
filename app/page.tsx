@@ -1950,6 +1950,15 @@ function FallErfassenPage({ editId, onSaved, onCancel, isAdmin = false }: FallFo
               )
             }
           }
+        } else if (isAdmin) {
+          const now = new Date()
+          setCreatedAt(
+            `${now.getFullYear()}-${pad2(now.getMonth() + 1)}-${pad2(now.getDate())}T${pad2(now.getHours())}:${pad2(now.getMinutes())}`
+          )
+          setCreatedAtDisplay(
+            `${pad2(now.getDate())}.${pad2(now.getMonth() + 1)}.${now.getFullYear()} ${pad2(now.getHours())}:${pad2(now.getMinutes())}`
+          )
+          setTimeInput(`${pad2(now.getHours())}:${pad2(now.getMinutes())}`)
         }
       } catch {
         // ignore
@@ -1958,7 +1967,7 @@ function FallErfassenPage({ editId, onSaved, onCancel, isAdmin = false }: FallFo
       }
     }
     load()
-  }, [editId])
+  }, [editId, isAdmin])
 
   function normalizeKundenAuftrag(value: string): string {
     const dotIndex = value.indexOf(".")
@@ -2089,7 +2098,7 @@ function FallErfassenPage({ editId, onSaved, onCancel, isAdmin = false }: FallFo
         kommentar: kommentar || null,
         mitarbeiterId,
         verursacherId: verursacherId || null,
-        ...(editId && createdAt ? { createdAt } : {}),
+        ...((editId || isAdmin) && createdAt ? { createdAt } : {}),
         positionen: materialGruppen.map((g) => ({
           id: g.id.startsWith("edit-") ? crypto.randomUUID() : g.id,
           materialId: g.materialId,
@@ -2456,7 +2465,7 @@ function FallErfassenPage({ editId, onSaved, onCancel, isAdmin = false }: FallFo
             />
           </Field>
 
-          {editId && (
+          {(isAdmin || editId) && (
             <Field data-invalid={!!createdAtError}>
               <FieldLabel>Datum</FieldLabel>
               <div className="flex items-center gap-2">
