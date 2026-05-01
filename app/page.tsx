@@ -103,6 +103,8 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination"
+import { CalendarIcon } from "lucide-react"
+import { Calendar } from "@/components/ui/calendar"
 import {
   AlertCircle,
   ArrowDown,
@@ -1874,6 +1876,9 @@ function FallErfassenPage({ editId, onSaved, onCancel, isAdmin = false }: FallFo
   const [mitarbeiterId, setMitarbeiterId] = React.useState("")
   const [verursacherId, setVerursacherId] = React.useState("")
   const [createdAt, setCreatedAt] = React.useState("")
+  const [createdAtDisplay, setCreatedAtDisplay] = React.useState("")
+  const [calendarOpen, setCalendarOpen] = React.useState(false)
+  const [createdAtError, setCreatedAtError] = React.useState("")
 
   const [fehlercodesList, setFehlercodesList] = React.useState<ApiFehlercode[]>([])
   const [abteilungenList, setAbteilungenList] = React.useState<ApiAbteilung[]>([])
@@ -1927,6 +1932,9 @@ function FallErfassenPage({ editId, onSaved, onCancel, isAdmin = false }: FallFo
               const pad = (n: number) => String(n).padStart(2, "0")
               setCreatedAt(
                 `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+              )
+              setCreatedAtDisplay(
+                `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`
               )
             }
             if (fall.positionen && fall.positionen.length > 0) {
@@ -2019,6 +2027,22 @@ function FallErfassenPage({ editId, onSaved, onCancel, isAdmin = false }: FallFo
     )
   }
 
+  const pad2 = (n: number) => String(n).padStart(2, "0")
+
+  function isoToDisplay(iso: string): string {
+    const d = new Date(iso)
+    if (isNaN(d.getTime())) return ""
+    return `${pad2(d.getDate())}.${pad2(d.getMonth() + 1)}.${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`
+  }
+
+  function displayToIso(display: string): string | null {
+    const m = display.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})\s+(\d{1,2}):(\d{2})$/)
+    if (!m) return null
+    const d = new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1]), Number(m[4]), Number(m[5]))
+    if (isNaN(d.getTime())) return null
+    return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}T${pad2(d.getHours())}:${pad2(d.getMinutes())}`
+  }
+
   function validate() {
     const newErrors: typeof errors = {}
     if (!maschine) newErrors.maschine = "Maschine ist erforderlich."
@@ -2040,6 +2064,11 @@ function FallErfassenPage({ editId, onSaved, onCancel, isAdmin = false }: FallFo
       }
     }
     if (!mitarbeiterId) newErrors.mitarbeiterId = "Mitarbeiter ist erforderlich."
+    if (createdAtDisplay && !createdAt) {
+      setCreatedAtError("Ungültiges Datum (TT.MM.JJJJ HH:mm)")
+    } else {
+      setCreatedAtError("")
+    }
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -2096,6 +2125,8 @@ function FallErfassenPage({ editId, onSaved, onCancel, isAdmin = false }: FallFo
         setMitarbeiterId("")
         setVerursacherId("")
         setCreatedAt("")
+        setCreatedAtDisplay("")
+        setCreatedAtError("")
         setErrors({})
       }
 
@@ -2423,13 +2454,52 @@ function FallErfassenPage({ editId, onSaved, onCancel, isAdmin = false }: FallFo
           </Field>
 
           {editId && (
-            <Field className="w-fit">
+            <Field data-invalid={!!createdAtError}>
               <FieldLabel>Datum</FieldLabel>
-              <Input
-                type="datetime-local"
-                value={createdAt}
-                onChange={(e) => setCreatedAt(e.target.value)}
-              />
+              <div className="flex items-center gap-2">
+                <Input
+                  placeholder="TT.MM.JJJJ HH:mm"
+                  value={createdAtDisplay}
+                  onChange={(e) => {
+                    setCreatedAtDisplay(e.target.value)
+                    setCreatedAtError("")
+                    const iso = displayToIso(e.target.value)
+                    if (iso) {
+                      setCreatedAt(iso)
+                    } else if (e.target.value === "") {
+                      setCreatedAt("")
+                    }
+                  }}
+                  className="w-[180px]"
+                />
+                <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="icon" className="shrink-0">
+                      <CalendarIcon className="size-4" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={createdAt ? new Date(createdAt) : undefined}
+                      onSelect={(date) => {
+                        if (date) {
+                          const existing = createdAt ? new Date(createdAt) : new Date()
+                          date.setHours(existing.getHours(), existing.getMinutes())
+                          const iso = `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}T${pad2(date.getHours())}:${pad2(date.getMinutes())}`
+                          setCreatedAt(iso)
+                          setCreatedAtDisplay(
+                            `${pad2(date.getDate())}.${pad2(date.getMonth() + 1)}.${date.getFullYear()} ${pad2(date.getHours())}:${pad2(date.getMinutes())}`
+                          )
+                          setCreatedAtError("")
+                        }
+                        setCalendarOpen(false)
+                      }}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              {createdAtError && <FieldError>{createdAtError}</FieldError>}
             </Field>
           )}
 
