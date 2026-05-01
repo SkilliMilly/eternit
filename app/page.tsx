@@ -1877,6 +1877,7 @@ function FallErfassenPage({ editId, onSaved, onCancel, isAdmin = false }: FallFo
   const [verursacherId, setVerursacherId] = React.useState("")
   const [createdAt, setCreatedAt] = React.useState("")
   const [createdAtDisplay, setCreatedAtDisplay] = React.useState("")
+  const [timeInput, setTimeInput] = React.useState("")
   const [calendarOpen, setCalendarOpen] = React.useState(false)
   const [createdAtError, setCreatedAtError] = React.useState("")
 
@@ -1936,6 +1937,7 @@ function FallErfassenPage({ editId, onSaved, onCancel, isAdmin = false }: FallFo
               setCreatedAtDisplay(
                 `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`
               )
+              setTimeInput(`${pad(d.getHours())}:${pad(d.getMinutes())}`)
             }
             if (fall.positionen && fall.positionen.length > 0) {
               setMaterialGruppen(
@@ -2126,6 +2128,7 @@ function FallErfassenPage({ editId, onSaved, onCancel, isAdmin = false }: FallFo
         setVerursacherId("")
         setCreatedAt("")
         setCreatedAtDisplay("")
+        setTimeInput("")
         setCreatedAtError("")
         setErrors({})
       }
@@ -2491,6 +2494,7 @@ function FallErfassenPage({ editId, onSaved, onCancel, isAdmin = false }: FallFo
                           setCreatedAtDisplay(
                             `${pad2(date.getDate())}.${pad2(date.getMonth() + 1)}.${date.getFullYear()} ${pad2(date.getHours())}:${pad2(date.getMinutes())}`
                           )
+                          setTimeInput(`${pad2(date.getHours())}:${pad2(date.getMinutes())}`)
                           setCreatedAtError("")
                         }
                       }}
@@ -2499,13 +2503,10 @@ function FallErfassenPage({ editId, onSaved, onCancel, isAdmin = false }: FallFo
                       <label className="text-xs text-muted-foreground shrink-0">Zeit</label>
                       <Input
                         placeholder="HH:mm"
-                        value={
-                          createdAt
-                            ? `${pad2(new Date(createdAt).getHours())}:${pad2(new Date(createdAt).getMinutes())}`
-                            : ""
-                        }
+                        value={timeInput}
                         onChange={(e) => {
                           const val = e.target.value
+                          setTimeInput(val)
                           const match = val.match(/^(\d{1,2}):(\d{2})$/)
                           if (match) {
                             const hh = Number(match[1])
