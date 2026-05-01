@@ -1,0 +1,55 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1777401381537,
+      "tag": "0000_melodic_war_machine",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1777407962257,
+      "tag": "0001_low_lady_mastermind",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1777484373298,
+      "tag": "0002_late_enchantress",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1777567276109,
+      "tag": "0003_short_stepford_cuckoos",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1777572044988,
+      "tag": "0004_spooky_vision",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1777573619679,
+      "tag": "0005_light_smasher",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1777575495146,
+      "tag": "0006_supreme_slapstick",
+      "breakpoints": true
+    }
+  ]
+}
