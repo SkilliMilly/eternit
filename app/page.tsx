@@ -2151,7 +2151,7 @@ function FallErfassenPage({ editId, onSaved, onCancel, isAdmin = false }: FallFo
           <Field data-invalid={!!errors.maschine}>
             <FieldLabel>Maschine</FieldLabel>
             <RadioGroup value={maschine} onValueChange={setMaschine} className="flex flex-wrap gap-4">
-              {["Selco", "Schelling", "Homag", "Rover 2", "Rover 3", "Rover 4"].map((m) => (
+              {["Selco", "Schelling", "Homag", "Rover 2", "Rover 3", "Rover 4", "Unbekannt"].map((m) => (
                 <div key={m} className="flex items-center gap-2">
                   <RadioGroupItem value={m} id={`maschine-${m}`} />
                   <Label htmlFor={`maschine-${m}`}>{m}</Label>
