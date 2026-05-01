@@ -17,13 +17,11 @@ export async function POST(request: Request) {
 
     const uniqueIds = [...new Set(ids as string[])]
 
-    db.delete(fallPositionen)
+    await db.delete(fallPositionen)
       .where(inArray(fallPositionen.fallId, uniqueIds))
-      .run()
 
-    db.delete(faelle)
+    await db.delete(faelle)
       .where(inArray(faelle.id, uniqueIds))
-      .run()
 
     return NextResponse.json({ success: true })
   } catch (error) {

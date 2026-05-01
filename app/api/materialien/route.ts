@@ -5,7 +5,7 @@ import { eq, and } from "drizzle-orm"
 
 export async function GET() {
   try {
-    const data = db.select().from(materialien).all()
+    const data = await db.select().from(materialien)
     return NextResponse.json(data)
   } catch (error) {
     console.error("GET /api/materialien error:", error)
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     const artikel = artikelNr.trim()
     const color = farbe.trim()
 
-    const existing = db
+    const existing = await db
       .select()
       .from(materialien)
       .where(
@@ -40,18 +40,17 @@ export async function POST(request: Request) {
           eq(materialien.farbe, color)
         )
       )
-      .all()
 
     if (existing.length > 0) {
       return NextResponse.json(existing[0])
     }
 
     const id = crypto.randomUUID()
-    db.insert(materialien).values({
+    await db.insert(materialien).values({
       id,
       artikelNr: artikel,
       farbe: color,
-    }).run()
+    })
 
     return NextResponse.json({ id, artikelNr: artikel, farbe: color }, { status: 201 })
   } catch (error) {

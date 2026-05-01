@@ -113,7 +113,7 @@ export async function POST(request: Request) {
       }
 
       try {
-        const existing = db
+        const existing = await db
           .select()
           .from(csvAuftraege)
           .where(
@@ -124,13 +124,12 @@ export async function POST(request: Request) {
               eq(csvAuftraege.fauf, fauf)
             )
           )
-          .all()
 
         if (existing.length > 0) {
           continue
         }
 
-        const existingMaterial = db
+        const existingMaterial = await db
           .select()
           .from(materialien)
           .where(
@@ -139,24 +138,23 @@ export async function POST(request: Request) {
               eq(materialien.farbe, farbe)
             )
           )
-          .all()
 
         if (existingMaterial.length === 0) {
-          db.insert(materialien).values({
+          await db.insert(materialien).values({
             id: crypto.randomUUID(),
             artikelNr,
             farbe,
-          }).run()
+          })
           neueMaterialien++
         }
 
-        db.insert(csvAuftraege).values({
+        await db.insert(csvAuftraege).values({
           id: crypto.randomUUID(),
           kundenAuftrag,
           artikelNr,
           farbe,
           fauf,
-        }).run()
+        })
         neueFaelle++
       } catch {
         // Skip rows with DB errors silently
@@ -175,7 +173,7 @@ export async function POST(request: Request) {
 
 export async function DELETE() {
   try {
-    db.delete(csvAuftraege).run()
+    await db.delete(csvAuftraege)
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error("DELETE /api/csv-import error:", error)

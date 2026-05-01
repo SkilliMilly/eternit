@@ -15,11 +15,10 @@ export async function GET(request: Request) {
       )
     }
 
-    const results = db
+    const results = await db
       .select()
       .from(csvAuftraege)
       .where(eq(csvAuftraege.fauf, fauf.trim()))
-      .all()
 
     return NextResponse.json(results)
   } catch (error) {

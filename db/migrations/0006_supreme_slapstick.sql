@@ -1,1 +1,0 @@
-ALTER TABLE `faelle` ADD `verursacher_id` text;

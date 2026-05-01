@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { db } from "@/db"
 import { faelle, fallPositionen, fehlercodes, abteilungen, mitarbeiter, materialien } from "@/db/schema"
 import { eq } from "drizzle-orm"
-import { alias } from "drizzle-orm/sqlite-core"
+import { alias } from "drizzle-orm/pg-core"
 
 function getKW(date: Date): number {
   const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
@@ -17,7 +17,7 @@ type ChartDataPoint = { kw: string; stueckzahl: number }
 export async function GET() {
   try {
     const verursacher = alias(mitarbeiter, "verursacher")
-    const results = db
+    const results = await db
       .select({
         fallId: faelle.id,
         createdAt: faelle.createdAt,
@@ -40,7 +40,6 @@ export async function GET() {
       .leftJoin(abteilungen, eq(fehlercodes.departmentId, abteilungen.id))
       .leftJoin(verursacher, eq(faelle.verursacherId, verursacher.id))
       .where(eq(faelle.fallTyp, "ausschuss"))
-      .all()
 
     const pvMap = new Map<number, number>()
     const otherMap = new Map<number, number>()

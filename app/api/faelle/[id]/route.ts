@@ -7,12 +7,13 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   try {
     const { id } = await params
 
-    const fall = db.select().from(faelle).where(eq(faelle.id, id)).get()
+    const falls = await db.select().from(faelle).where(eq(faelle.id, id)).limit(1)
+    const fall = falls[0]
     if (!fall) {
       return NextResponse.json({ error: "Case not found" }, { status: 404 })
     }
 
-    const positionen = db
+    const positionen = await db
       .select({
         id: fallPositionen.id,
         materialId: fallPositionen.materialId,
@@ -27,7 +28,6 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
       .innerJoin(materialien, eq(fallPositionen.materialId, materialien.id))
       .leftJoin(fehlercodes, eq(fallPositionen.fehlercodeId, fehlercodes.id))
       .where(eq(fallPositionen.fallId, id))
-      .all()
 
     return NextResponse.json({ ...fall, positionen })
   } catch (error) {
@@ -78,7 +78,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       }
     }
 
-    db.update(faelle)
+    await db.update(faelle)
       .set({
         maschine,
         fallTyp,
@@ -91,12 +91,11 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         ...(createdAt ? { createdAt: new Date(createdAt) } : {}),
       })
       .where(eq(faelle.id, id))
-      .run()
 
-    db.delete(fallPositionen).where(eq(fallPositionen.fallId, id)).run()
+    await db.delete(fallPositionen).where(eq(fallPositionen.fallId, id))
 
     for (const pos of positionen) {
-      db.insert(fallPositionen)
+      await db.insert(fallPositionen)
         .values({
           id: pos.id || crypto.randomUUID(),
           fallId: id,
@@ -104,7 +103,6 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
           stueckzahl: Number(pos.stueckzahl),
           fehlercodeId: pos.fehlercodeId?.trim() || null,
         })
-        .run()
     }
 
     return NextResponse.json({ success: true })
@@ -118,8 +116,8 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
   try {
     const { id } = await params
 
-    db.delete(fallPositionen).where(eq(fallPositionen.fallId, id)).run()
-    db.delete(faelle).where(eq(faelle.id, id)).run()
+    await db.delete(fallPositionen).where(eq(fallPositionen.fallId, id))
+    await db.delete(faelle).where(eq(faelle.id, id))
 
     return NextResponse.json({ success: true })
   } catch (error) {

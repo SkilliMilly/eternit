@@ -2,12 +2,12 @@ import { NextResponse } from "next/server"
 import { db } from "@/db"
 import { faelle, fallPositionen, materialien, fehlercodes, abteilungen, mitarbeiter } from "@/db/schema"
 import { eq, desc } from "drizzle-orm"
-import { alias } from "drizzle-orm/sqlite-core"
+import { alias } from "drizzle-orm/pg-core"
 
 export async function GET() {
   try {
     const verursacher = alias(mitarbeiter, "verursacher")
-    const results = db
+    const results = await db
       .select({
         fallId: faelle.id,
         createdAt: faelle.createdAt,
@@ -32,7 +32,6 @@ export async function GET() {
       .leftJoin(abteilungen, eq(fehlercodes.departmentId, abteilungen.id))
       .leftJoin(verursacher, eq(faelle.verursacherId, verursacher.id))
       .orderBy(desc(faelle.createdAt))
-      .all()
 
     return NextResponse.json(results)
   } catch (error) {
@@ -85,7 +84,7 @@ export async function POST(request: Request) {
       }
     }
 
-    db.insert(faelle)
+    await db.insert(faelle)
       .values({
         id,
         maschine,
@@ -96,10 +95,9 @@ export async function POST(request: Request) {
         mitarbeiterId,
         verursacherId: verursacherId?.trim() || null,
       })
-      .run()
 
     for (const pos of positionen) {
-      db.insert(fallPositionen)
+      await db.insert(fallPositionen)
         .values({
           id: pos.id || crypto.randomUUID(),
           fallId: id,
@@ -107,7 +105,6 @@ export async function POST(request: Request) {
           stueckzahl: Number(pos.stueckzahl),
           fehlercodeId: pos.fehlercodeId?.trim() || null,
         })
-        .run()
     }
 
     return NextResponse.json({ success: true }, { status: 201 })

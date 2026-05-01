@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm"
 
 export async function GET() {
   try {
-    const data = await db.select().from(abteilungen).all()
+    const data = await db.select().from(abteilungen)
     return NextResponse.json(data)
   } catch (error) {
     console.error("GET /api/abteilungen error:", error)
