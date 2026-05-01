@@ -2497,45 +2497,33 @@ function FallErfassenPage({ editId, onSaved, onCancel, isAdmin = false }: FallFo
                     />
                     <div className="flex items-center justify-center gap-2 border-t px-3 py-2">
                       <label className="text-xs text-muted-foreground shrink-0">Zeit</label>
-                      <select
-                        value={createdAt ? pad2(new Date(createdAt).getHours()) : "00"}
+                      <Input
+                        placeholder="HH:mm"
+                        value={
+                          createdAt
+                            ? `${pad2(new Date(createdAt).getHours())}:${pad2(new Date(createdAt).getMinutes())}`
+                            : ""
+                        }
                         onChange={(e) => {
-                          const d = createdAt ? new Date(createdAt) : new Date()
-                          d.setHours(Number(e.target.value))
-                          d.setMilliseconds(0)
-                          const iso = `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}T${pad2(d.getHours())}:${pad2(d.getMinutes())}`
-                          setCreatedAt(iso)
-                          setCreatedAtDisplay(
-                            `${pad2(d.getDate())}.${pad2(d.getMonth() + 1)}.${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`
-                          )
-                          setCreatedAtError("")
+                          const val = e.target.value
+                          const match = val.match(/^(\d{1,2}):(\d{2})$/)
+                          if (match) {
+                            const hh = Number(match[1])
+                            const mm = Number(match[2])
+                            if (hh >= 0 && hh <= 23 && mm >= 0 && mm <= 59) {
+                              const d = createdAt ? new Date(createdAt) : new Date()
+                              d.setHours(hh, mm, 0, 0)
+                              const iso = `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}T${pad2(d.getHours())}:${pad2(d.getMinutes())}`
+                              setCreatedAt(iso)
+                              setCreatedAtDisplay(
+                                `${pad2(d.getDate())}.${pad2(d.getMonth() + 1)}.${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`
+                              )
+                              setCreatedAtError("")
+                            }
+                          }
                         }}
-                        className="h-8 rounded-md border border-input bg-background px-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                      >
-                        {Array.from({ length: 24 }, (_, i) => (
-                          <option key={i} value={String(i)}>{pad2(i)}</option>
-                        ))}
-                      </select>
-                      <span className="text-sm font-medium">:</span>
-                      <select
-                        value={createdAt ? pad2(new Date(createdAt).getMinutes()) : "00"}
-                        onChange={(e) => {
-                          const d = createdAt ? new Date(createdAt) : new Date()
-                          d.setMinutes(Number(e.target.value))
-                          d.setMilliseconds(0)
-                          const iso = `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}T${pad2(d.getHours())}:${pad2(d.getMinutes())}`
-                          setCreatedAt(iso)
-                          setCreatedAtDisplay(
-                            `${pad2(d.getDate())}.${pad2(d.getMonth() + 1)}.${d.getFullYear()} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`
-                          )
-                          setCreatedAtError("")
-                        }}
-                        className="h-8 rounded-md border border-input bg-background px-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                      >
-                        {Array.from({ length: 60 }, (_, i) => (
-                          <option key={i} value={String(i)}>{pad2(i)}</option>
-                        ))}
-                      </select>
+                        className="h-8 w-[72px] px-2 text-center font-mono text-sm"
+                      />
                     </div>
                   </PopoverContent>
                 </Popover>
